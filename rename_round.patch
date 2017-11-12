@@ -1,0 +1,85 @@
+diff --git a/src/base/math.h b/src/base/math.h
+index d58dbf102d..07b0639654 100644
+--- a/src/base/math.h
++++ b/src/base/math.h
+@@ -20,7 +20,7 @@ inline float sign(float f)
+ 	return f<0.0f?-1.0f:1.0f;
+ }
+ 
+-inline int round(float f)
++inline int round_to_int(float f)
+ {
+ 	if(f > 0)
+ 		return (int)(f+0.5f);
+diff --git a/src/game/collision.h b/src/game/collision.h
+index d16f2d5618..cad75bb473 100644
+--- a/src/game/collision.h
++++ b/src/game/collision.h
+@@ -25,9 +25,9 @@ class CCollision
+ 
+ 	CCollision();
+ 	void Init(class CLayers *pLayers);
+-	bool CheckPoint(float x, float y) { return IsTileSolid(round(x), round(y)); }
++	bool CheckPoint(float x, float y) { return IsTileSolid(round_to_int(x), round_to_int(y)); }
+ 	bool CheckPoint(vec2 Pos) { return CheckPoint(Pos.x, Pos.y); }
+-	int GetCollisionAt(float x, float y) { return GetTile(round(x), round(y)); }
++	int GetCollisionAt(float x, float y) { return GetTile(round_to_int(x), round_to_int(y)); }
+ 	int GetWidth() { return m_Width; };
+ 	int GetHeight() { return m_Height; };
+ 	int IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision);
+diff --git a/src/game/editor/layer_tiles.cpp b/src/game/editor/layer_tiles.cpp
+index 032f391f87..0cdd760924 100644
+--- a/src/game/editor/layer_tiles.cpp
++++ b/src/game/editor/layer_tiles.cpp
+@@ -248,7 +248,7 @@ void CLayerTiles::BrushFlipY()
+ 
+ void CLayerTiles::BrushRotate(float Amount)
+ {
+-	int Rotation = (round(360.0f*Amount/(pi*2))/90)%4;	// 0=0°, 1=90°, 2=180°, 3=270°
++	int Rotation = (round_to_int(360.0f*Amount/(pi*2))/90)%4;	// 0=0°, 1=90°, 2=180°, 3=270°
+ 	if(Rotation < 0)
+ 		Rotation +=4;
+ 
+diff --git a/src/game/gamecore.cpp b/src/game/gamecore.cpp
+index d43492ac31..a325a53e1b 100644
+--- a/src/game/gamecore.cpp
++++ b/src/game/gamecore.cpp
+@@ -401,17 +401,17 @@ void CCharacterCore::Move()
+ 
+ void CCharacterCore::Write(CNetObj_CharacterCore *pObjCore)
+ {
+-	pObjCore->m_X = round(m_Pos.x);
+-	pObjCore->m_Y = round(m_Pos.y);
++	pObjCore->m_X = round_to_int(m_Pos.x);
++	pObjCore->m_Y = round_to_int(m_Pos.y);
+ 
+-	pObjCore->m_VelX = round(m_Vel.x*256.0f);
+-	pObjCore->m_VelY = round(m_Vel.y*256.0f);
++	pObjCore->m_VelX = round_to_int(m_Vel.x*256.0f);
++	pObjCore->m_VelY = round_to_int(m_Vel.y*256.0f);
+ 	pObjCore->m_HookState = m_HookState;
+ 	pObjCore->m_HookTick = m_HookTick;
+-	pObjCore->m_HookX = round(m_HookPos.x);
+-	pObjCore->m_HookY = round(m_HookPos.y);
+-	pObjCore->m_HookDx = round(m_HookDir.x*256.0f);
+-	pObjCore->m_HookDy = round(m_HookDir.y*256.0f);
++	pObjCore->m_HookX = round_to_int(m_HookPos.x);
++	pObjCore->m_HookY = round_to_int(m_HookPos.y);
++	pObjCore->m_HookDx = round_to_int(m_HookDir.x*256.0f);
++	pObjCore->m_HookDy = round_to_int(m_HookDir.y*256.0f);
+ 	pObjCore->m_HookedPlayer = m_HookedPlayer;
+ 	pObjCore->m_Jumped = m_Jumped;
+ 	pObjCore->m_Direction = m_Direction;
+diff --git a/src/game/server/entity.cpp b/src/game/server/entity.cpp
+index 788c3f45b9..3b47e024f8 100644
+--- a/src/game/server/entity.cpp
++++ b/src/game/server/entity.cpp
+@@ -51,6 +51,6 @@ int CEntity::NetworkClipped(int SnappingClient, vec2 CheckPos)
+ 
+ bool CEntity::GameLayerClipped(vec2 CheckPos)
+ {
+-	return round(CheckPos.x)/32 < -200 || round(CheckPos.x)/32 > GameServer()->Collision()->GetWidth()+200 ||
+-			round(CheckPos.y)/32 < -200 || round(CheckPos.y)/32 > GameServer()->Collision()->GetHeight()+200 ? true : false;
++	return round_to_int(CheckPos.x)/32 < -200 || round_to_int(CheckPos.x)/32 > GameServer()->Collision()->GetWidth()+200 ||
++			round_to_int(CheckPos.y)/32 < -200 || round_to_int(CheckPos.y)/32 > GameServer()->Collision()->GetHeight()+200 ? true : false;
+ }

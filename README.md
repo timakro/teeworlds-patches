@@ -7,3 +7,5 @@ game
 * `utf8_names.patch`: Allows UTF-8 player names
 * `console_crash.patch`: Fixes an old bug that made servers occasionally
 crash when console commands were executed
+* `rename_round.patch`: Rename `round` function to `round_to_int` to fix
+conflicts
